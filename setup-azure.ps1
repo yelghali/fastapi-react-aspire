@@ -8,14 +8,14 @@
 # Usage: .\setup-azure.ps1 -GitHubRepo "org/repo" [-ResourceGroup "rg-name"] [-Location "eastus"]
 
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$GitHubRepo,
+  [Parameter(Mandatory = $true)]
+  [string]$GitHubRepo,
 
-    [string]$ResourceGroup = "fastapi-react-aspire-rg",
+  [string]$ResourceGroup = "fastapi-react-aspire-rg",
 
-    [string]$Location = "eastus",
+  [string]$Location = "eastus",
 
-    [string]$AppName = "fastapi-react-aspire-deploy"
+  [string]$AppName = "fastapi-react-aspire-deploy"
 )
 
 $ErrorActionPreference = "Stop"
@@ -25,11 +25,11 @@ Write-Host ""
 
 # Check prerequisites
 function Test-CommandExists {
-    param($Command, $InstallHint)
-    if (!(Get-Command $Command -ErrorAction SilentlyContinue)) {
-        Write-Host "❌ $Command is not installed. $InstallHint" -ForegroundColor Red
-        exit 1
-    }
+  param($Command, $InstallHint)
+  if (!(Get-Command $Command -ErrorAction SilentlyContinue)) {
+    Write-Host "❌ $Command is not installed. $InstallHint" -ForegroundColor Red
+    exit 1
+  }
 }
 
 Test-CommandExists "az" "Install from: https://docs.microsoft.com/cli/azure/install-azure-cli"
@@ -39,9 +39,9 @@ Test-CommandExists "gh" "Install from: https://cli.github.com/"
 Write-Host "Checking Azure login..." -ForegroundColor Cyan
 $account = az account show 2>$null | ConvertFrom-Json
 if (!$account) {
-    Write-Host "Please log in to Azure:" -ForegroundColor Yellow
-    az login
-    $account = az account show | ConvertFrom-Json
+  Write-Host "Please log in to Azure:" -ForegroundColor Yellow
+  az login
+  $account = az account show | ConvertFrom-Json
 }
 $SubscriptionId = $account.id
 $TenantId = $account.tenantId
@@ -49,10 +49,10 @@ Write-Host "✅ Logged in to Azure (Subscription: $SubscriptionId)" -ForegroundC
 
 # Verify GitHub login
 Write-Host "Checking GitHub login..." -ForegroundColor Cyan
-$ghStatus = gh auth status 2>&1
+$null = gh auth status 2>&1
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Please log in to GitHub:" -ForegroundColor Yellow
-    gh auth login
+  Write-Host "Please log in to GitHub:" -ForegroundColor Yellow
+  gh auth login
 }
 Write-Host "✅ Logged in to GitHub" -ForegroundColor Green
 
@@ -68,11 +68,12 @@ Write-Host "Creating Azure AD application '$AppName'..." -ForegroundColor Cyan
 $existingApp = az ad app list --display-name $AppName --query "[0].appId" -o tsv 2>$null
 
 if ([string]::IsNullOrEmpty($existingApp) -or $existingApp -eq "null") {
-    $AppId = az ad app create --display-name $AppName --query appId -o tsv
-    Write-Host "✅ Created new Azure AD application" -ForegroundColor Green
-} else {
-    $AppId = $existingApp
-    Write-Host "ℹ️  Using existing Azure AD application" -ForegroundColor Yellow
+  $AppId = az ad app create --display-name $AppName --query appId -o tsv
+  Write-Host "✅ Created new Azure AD application" -ForegroundColor Green
+}
+else {
+  $AppId = $existingApp
+  Write-Host "ℹ️  Using existing Azure AD application" -ForegroundColor Yellow
 }
 
 # Create service principal if it doesn't exist
@@ -81,10 +82,11 @@ Write-Host "Creating service principal..." -ForegroundColor Cyan
 $existingSp = az ad sp list --filter "appId eq '$AppId'" --query "[0].id" -o tsv 2>$null
 
 if ([string]::IsNullOrEmpty($existingSp) -or $existingSp -eq "null") {
-    $SpId = az ad sp create --id $AppId --query id -o tsv
-    Write-Host "✅ Created service principal" -ForegroundColor Green
-} else {
-    Write-Host "ℹ️  Using existing service principal" -ForegroundColor Yellow
+  $null = az ad sp create --id $AppId --query id -o tsv
+  Write-Host "✅ Created service principal" -ForegroundColor Green
+}
+else {
+  Write-Host "ℹ️  Using existing service principal" -ForegroundColor Yellow
 }
 
 # Create federated credential for GitHub Actions
@@ -95,27 +97,28 @@ $CredentialName = "github-actions-main"
 $existingCred = az ad app federated-credential list --id $AppId --query "[?name=='$CredentialName'].name" -o tsv 2>$null
 
 if ([string]::IsNullOrEmpty($existingCred)) {
-    $credParams = @{
-        name = $CredentialName
-        issuer = "https://token.actions.githubusercontent.com"
-        subject = "repo:${GitHubRepo}:ref:refs/heads/main"
-        audiences = @("api://AzureADTokenExchange")
-    } | ConvertTo-Json -Compress
+  $credParams = @{
+    name      = $CredentialName
+    issuer    = "https://token.actions.githubusercontent.com"
+    subject   = "repo:${GitHubRepo}:ref:refs/heads/main"
+    audiences = @("api://AzureADTokenExchange")
+  } | ConvertTo-Json -Compress
 
-    az ad app federated-credential create --id $AppId --parameters $credParams --output none
-    Write-Host "✅ Created federated credential for main branch" -ForegroundColor Green
-} else {
-    Write-Host "ℹ️  Federated credential already exists" -ForegroundColor Yellow
+  az ad app federated-credential create --id $AppId --parameters $credParams --output none
+  Write-Host "✅ Created federated credential for main branch" -ForegroundColor Green
+}
+else {
+  Write-Host "ℹ️  Federated credential already exists" -ForegroundColor Yellow
 }
 
 # Assign Contributor role to the service principal
 Write-Host ""
 Write-Host "Assigning Contributor role to service principal..." -ForegroundColor Cyan
 az role assignment create `
-    --assignee $AppId `
-    --role "Contributor" `
-    --scope "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup" `
-    --output none 2>$null
+  --assignee $AppId `
+  --role "Contributor" `
+  --scope "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup" `
+  --output none 2>$null
 Write-Host "✅ Role assignment ready" -ForegroundColor Green
 
 # Configure GitHub secrets

@@ -26,7 +26,7 @@ Test-Command "uv" "Install with: irm https://astral.sh/uv/install.ps1 | iex"
 if (!(Get-Command aspire -ErrorAction SilentlyContinue)) {
   Write-Host ""
   Write-Host "📦 Installing Aspire CLI..." -ForegroundColor Cyan
-  irm https://aspire.dev/install.ps1 | iex
+  Invoke-RestMethod https://aspire.dev/install.ps1 | Invoke-Expression
   $env:PATH = "$env:USERPROFILE\.aspire\bin;$env:PATH"
 }
 Write-Host "✅ Aspire CLI found" -ForegroundColor Green
