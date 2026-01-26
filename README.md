@@ -35,6 +35,17 @@ irm https://aspire.dev/install.ps1 | iex          # Windows PowerShell
 git clone https://github.com/sethjuarez/fastapi-react-aspire
 cd fastapi-react-aspire
 
+# Run setup script (checks prerequisites, installs Aspire CLI, sets up pre-commit)
+./setup.sh        # Linux/macOS
+.\setup.ps1       # Windows PowerShell
+
+# Start the application
+aspire run
+```
+
+Or manually:
+
+```bash
 # (Optional) Install pre-commit hooks for local linting
 uv tool install pre-commit
 pre-commit install
