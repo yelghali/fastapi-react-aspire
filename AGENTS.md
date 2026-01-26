@@ -27,6 +27,8 @@ This repository is set up to use **Aspire**. Aspire is an orchestrator for the e
 | Add Python dep | Edit `api/pyproject.toml`, then `uv sync` |
 | Add npm dep | `cd web && npm install <package>` |
 | Deploy to Azure | `aspire deploy` |
+| Install pre-commit | `uv tool install pre-commit && pre-commit install` |
+| Run all checks | `pre-commit run --all-files` |
 
 ### Environment Variables Pattern
 

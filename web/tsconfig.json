@@ -31,4 +31,3 @@
   ],
   "exclude": ["node_modules", "build", ".react-router"]
 }
-

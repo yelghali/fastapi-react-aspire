@@ -35,6 +35,10 @@ irm https://aspire.dev/install.ps1 | iex          # Windows PowerShell
 git clone https://github.com/sethjuarez/fastapi-react-aspire
 cd fastapi-react-aspire
 
+# (Optional) Install pre-commit hooks for local linting
+uv tool install pre-commit
+pre-commit install
+
 # Run with Aspire (installs dependencies automatically)
 aspire run
 ```

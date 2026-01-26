@@ -44,7 +44,7 @@ def _set_span_attributes(span: Span, attributes: dict[str, Any]) -> None:
             sanitized = sanitize(key, value)
             if sanitized is not None:
                 # Convert to string if not a basic type
-                if not isinstance(sanitized, (str, int, float, bool)):
+                if not isinstance(sanitized, str | int | float | bool):
                     sanitized = str(sanitized)
                 span.set_attribute(key, sanitized)
         except Exception:
