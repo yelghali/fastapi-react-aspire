@@ -30,6 +30,21 @@ This repository is set up to use **Aspire**. Aspire is an orchestrator for the e
 | Install pre-commit | `uv tool install pre-commit && pre-commit install` |
 | Run all checks | `pre-commit run --all-files` |
 
+### Pre-commit Hooks
+
+The project includes pre-commit hooks that run automatically on `git commit`:
+
+| Hook | What it does |
+| ---- | ------------ |
+| markdownlint | Lints markdown files against `.markdownlint.json` rules |
+| ruff | Lints Python code in `api/` with auto-fix |
+| ruff-format | Formats Python code in `api/` |
+| trailing-whitespace | Removes trailing spaces (excludes `.md` files) |
+| end-of-file-fixer | Ensures files end with a newline |
+| check-yaml | Validates YAML syntax |
+| check-json | Validates JSON syntax (excludes `.vscode/*.json` JSONC files) |
+| check-added-large-files | Prevents committing large files |
+
 ### Environment Variables Pattern
 
 All API config uses `APP_` prefix and is set in `apphost.cs`:
