@@ -174,6 +174,30 @@ This will:
 
 The template includes a deployment workflow (`.github/workflows/deploy.yml`) that deploys using Aspire.
 
+**Automated Setup** (recommended):
+
+```bash
+# Linux/macOS
+./setup-azure.sh myorg/fastapi-react-aspire [resource-group] [location]
+
+# Windows PowerShell
+.\setup-azure.ps1 -GitHubRepo "myorg/fastapi-react-aspire" [-ResourceGroup "rg-name"] [-Location "eastus"]
+```
+
+This script will:
+
+1. Create an Azure AD app registration with federated credentials
+2. Create a service principal with Contributor role
+3. Configure all required GitHub repository secrets
+
+**Prerequisites for setup script:**
+
+- [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) - logged in with `az login`
+- [GitHub CLI](https://cli.github.com/) - logged in with `gh auth login`
+
+<details>
+<summary><strong>Manual Setup</strong> (if you prefer not to use the script)</summary>
+
 **Required Secrets** (configure in GitHub repository settings):
 
 | Secret | Description |
@@ -207,6 +231,8 @@ az role assignment create \
   --role "Contributor" \
   --scope /subscriptions/<SUBSCRIPTION_ID>
 ```
+
+</details>
 
 **Trigger deployment**:
 

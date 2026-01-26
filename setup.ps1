@@ -6,13 +6,13 @@ $ErrorActionPreference = "Stop"
 Write-Host "🚀 Setting up FastAPI React Aspire template..." -ForegroundColor Cyan
 
 function Test-Command {
-    param($Command, $InstallHint)
-    if (!(Get-Command $Command -ErrorAction SilentlyContinue)) {
-        Write-Host "❌ $Command is not installed. Please install it first." -ForegroundColor Red
-        Write-Host "   $InstallHint" -ForegroundColor Yellow
-        exit 1
-    }
-    Write-Host "✅ $Command found" -ForegroundColor Green
+  param($Command, $InstallHint)
+  if (!(Get-Command $Command -ErrorAction SilentlyContinue)) {
+    Write-Host "❌ $Command is not installed. Please install it first." -ForegroundColor Red
+    Write-Host "   $InstallHint" -ForegroundColor Yellow
+    exit 1
+  }
+  Write-Host "✅ $Command found" -ForegroundColor Green
 }
 
 Write-Host ""
@@ -24,10 +24,10 @@ Test-Command "uv" "Install with: irm https://astral.sh/uv/install.ps1 | iex"
 
 # Check for Aspire CLI
 if (!(Get-Command aspire -ErrorAction SilentlyContinue)) {
-    Write-Host ""
-    Write-Host "📦 Installing Aspire CLI..." -ForegroundColor Cyan
-    irm https://aspire.dev/install.ps1 | iex
-    $env:PATH = "$env:USERPROFILE\.aspire\bin;$env:PATH"
+  Write-Host ""
+  Write-Host "📦 Installing Aspire CLI..." -ForegroundColor Cyan
+  irm https://aspire.dev/install.ps1 | iex
+  $env:PATH = "$env:USERPROFILE\.aspire\bin;$env:PATH"
 }
 Write-Host "✅ Aspire CLI found" -ForegroundColor Green
 
