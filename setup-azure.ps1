@@ -4,23 +4,35 @@
 # Prerequisites:
 #   - Azure CLI (az) - logged in with `az login`
 #   - GitHub CLI (gh) - logged in with `gh auth login`
+#   - Permission to create Azure AD app registrations (may require admin approval in some tenants)
 #
-# Usage: .\setup-azure.ps1 -GitHubRepo "org/repo" [-ResourceGroup "rg-name"] [-Location "eastus"]
+# Usage: .\setup-azure.ps1 -GitHubRepo "org/repo" [-AppName "my-app"] [-Location "eastus"]
 
 param(
   [Parameter(Mandatory = $true)]
   [string]$GitHubRepo,
 
-  [string]$ResourceGroup = "fastapi-react-aspire-rg",
+  [string]$AppName,
 
-  [string]$Location = "eastus",
-
-  [string]$AppName = "fastapi-react-aspire-deploy"
+  [string]$Location = "eastus"
 )
 
 $ErrorActionPreference = "Stop"
 
+# Derive app name from repo name if not provided
+if ([string]::IsNullOrEmpty($AppName)) {
+  $AppName = ($GitHubRepo -split "/")[-1]
+}
+
+# Sanitize app name (lowercase, alphanumeric and hyphens only)
+$AppName = $AppName.ToLower() -replace "[^a-z0-9-]", "-"
+
+# Derive resource names from app name
+$ResourceGroup = "$AppName-rg"
+$AppRegistrationName = "$AppName-deploy"
+
 Write-Host "🚀 Setting up Azure and GitHub for deployment..." -ForegroundColor Cyan
+Write-Host "   App Name: $AppName" -ForegroundColor Gray
 Write-Host ""
 
 # Check prerequisites
@@ -64,11 +76,15 @@ Write-Host "✅ Resource group ready" -ForegroundColor Green
 
 # Create Azure AD application
 Write-Host ""
-Write-Host "Creating Azure AD application '$AppName'..." -ForegroundColor Cyan
-$existingApp = az ad app list --display-name $AppName --query "[0].appId" -o tsv 2>$null
+Write-Host "Creating Azure AD application '$AppRegistrationName'..." -ForegroundColor Cyan
+$existingApp = az ad app list --display-name $AppRegistrationName --query "[0].appId" -o tsv 2>$null
 
 if ([string]::IsNullOrEmpty($existingApp) -or $existingApp -eq "null") {
-  $AppId = az ad app create --display-name $AppName --query appId -o tsv
+  $AppId = az ad app create --display-name $AppRegistrationName --sign-in-audience AzureADMyOrg --query appId -o tsv 2>$null
+  if ([string]::IsNullOrEmpty($AppId)) {
+    Write-Host "❌ Failed to create Azure AD application. You may need to create it manually in the Azure portal." -ForegroundColor Red
+    exit 1
+  }
   Write-Host "✅ Created new Azure AD application" -ForegroundColor Green
 }
 else {
@@ -82,7 +98,11 @@ Write-Host "Creating service principal..." -ForegroundColor Cyan
 $existingSp = az ad sp list --filter "appId eq '$AppId'" --query "[0].id" -o tsv 2>$null
 
 if ([string]::IsNullOrEmpty($existingSp) -or $existingSp -eq "null") {
-  $null = az ad sp create --id $AppId --query id -o tsv
+  $null = az ad sp create --id $AppId 2>$null
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Failed to create service principal" -ForegroundColor Red
+    exit 1
+  }
   Write-Host "✅ Created service principal" -ForegroundColor Green
 }
 else {
@@ -150,7 +170,7 @@ Write-Host "Azure Resources:"
 Write-Host "  • Subscription:     $SubscriptionId"
 Write-Host "  • Tenant:           $TenantId"
 Write-Host "  • Resource Group:   $ResourceGroup"
-Write-Host "  • App Registration: $AppName (ID: $AppId)"
+Write-Host "  • App Registration: $AppRegistrationName (ID: $AppId)"
 Write-Host ""
 Write-Host "GitHub Secrets configured in " -NoNewline
 Write-Host "$GitHubRepo" -ForegroundColor Cyan -NoNewline

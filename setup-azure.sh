@@ -5,9 +5,10 @@
 # Prerequisites:
 #   - Azure CLI (az) - logged in with `az login`
 #   - GitHub CLI (gh) - logged in with `gh auth login`
+#   - Permission to create Azure AD app registrations (may require admin approval in some tenants)
 #
-# Usage: ./setup-azure.sh <github-org/repo> [resource-group] [location]
-# Example: ./setup-azure.sh myorg/fastapi-react-aspire my-rg eastus
+# Usage: ./setup-azure.sh <github-org/repo> [app-name] [location]
+# Example: ./setup-azure.sh myorg/my-app my-app eastus
 
 set -e
 
@@ -20,17 +21,29 @@ NC='\033[0m' # No Color
 
 # Arguments
 GITHUB_REPO="${1:-}"
-RESOURCE_GROUP="${2:-fastapi-react-aspire-rg}"
+APP_NAME="${2:-}"
 LOCATION="${3:-eastus}"
-APP_NAME="fastapi-react-aspire-deploy"
 
 if [ -z "$GITHUB_REPO" ]; then
-    echo -e "${RED}❌ Usage: ./setup-azure.sh <github-org/repo> [resource-group] [location]${NC}"
-    echo -e "${YELLOW}   Example: ./setup-azure.sh myorg/fastapi-react-aspire my-rg eastus${NC}"
+    echo -e "${RED}❌ Usage: ./setup-azure.sh <github-org/repo> [app-name] [location]${NC}"
+    echo -e "${YELLOW}   Example: ./setup-azure.sh myorg/my-app my-app eastus${NC}"
     exit 1
 fi
 
+# Derive app name from repo name if not provided
+if [ -z "$APP_NAME" ]; then
+    APP_NAME=$(echo "$GITHUB_REPO" | cut -d'/' -f2)
+fi
+
+# Sanitize app name (lowercase, alphanumeric and hyphens only)
+APP_NAME=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
+
+# Derive resource names from app name
+RESOURCE_GROUP="${APP_NAME}-rg"
+APP_REGISTRATION_NAME="${APP_NAME}-deploy"
+
 echo -e "${CYAN}🚀 Setting up Azure and GitHub for deployment...${NC}"
+echo -e "   App Name: $APP_NAME"
 echo ""
 
 # Check prerequisites
@@ -70,11 +83,15 @@ echo -e "${GREEN}✅ Resource group ready${NC}"
 
 # Create Azure AD application
 echo ""
-echo -e "${CYAN}Creating Azure AD application '$APP_NAME'...${NC}"
-APP_ID=$(az ad app list --display-name "$APP_NAME" --query "[0].appId" -o tsv)
+echo -e "${CYAN}Creating Azure AD application '$APP_REGISTRATION_NAME'...${NC}"
+APP_ID=$(az ad app list --display-name "$APP_REGISTRATION_NAME" --query "[0].appId" -o tsv)
 
 if [ -z "$APP_ID" ] || [ "$APP_ID" == "null" ]; then
-    APP_ID=$(az ad app create --display-name "$APP_NAME" --query appId -o tsv)
+    APP_ID=$(az ad app create --display-name "$APP_REGISTRATION_NAME" --sign-in-audience AzureADMyOrg --query appId -o tsv 2>/dev/null)
+    if [ -z "$APP_ID" ]; then
+        echo -e "${RED}❌ Failed to create Azure AD application. You may need to create it manually in the Azure portal.${NC}"
+        exit 1
+    fi
     echo -e "${GREEN}✅ Created new Azure AD application${NC}"
 else
     echo -e "${YELLOW}ℹ️  Using existing Azure AD application${NC}"
@@ -86,7 +103,11 @@ echo -e "${CYAN}Creating service principal...${NC}"
 SP_ID=$(az ad sp list --filter "appId eq '$APP_ID'" --query "[0].id" -o tsv)
 
 if [ -z "$SP_ID" ] || [ "$SP_ID" == "null" ]; then
-    SP_ID=$(az ad sp create --id "$APP_ID" --query id -o tsv)
+    az ad sp create --id "$APP_ID" --output none 2>/dev/null
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ Failed to create service principal${NC}"
+        exit 1
+    fi
     echo -e "${GREEN}✅ Created service principal${NC}"
 else
     echo -e "${YELLOW}ℹ️  Using existing service principal${NC}"
@@ -151,7 +172,7 @@ echo -e "Azure Resources:"
 echo -e "  • Subscription:    $SUBSCRIPTION_ID"
 echo -e "  • Tenant:          $TENANT_ID"
 echo -e "  • Resource Group:  $RESOURCE_GROUP"
-echo -e "  • App Registration: $APP_NAME (ID: $APP_ID)"
+echo -e "  • App Registration: $APP_REGISTRATION_NAME (ID: $APP_ID)"
 echo ""
 echo -e "GitHub Secrets configured in ${CYAN}$GITHUB_REPO${NC}:"
 echo -e "  • AZURE_CLIENT_ID"

@@ -177,12 +177,23 @@ The template includes a deployment workflow (`.github/workflows/deploy.yml`) tha
 **Automated Setup** (recommended):
 
 ```bash
-# Linux/macOS
-./setup-azure.sh myorg/fastapi-react-aspire [resource-group] [location]
+# Linux/macOS - derives resource names from repo name
+./setup-azure.sh myorg/my-app
+
+# Or with custom app name and location
+./setup-azure.sh myorg/my-app my-custom-name westus2
 
 # Windows PowerShell
-.\setup-azure.ps1 -GitHubRepo "myorg/fastapi-react-aspire" [-ResourceGroup "rg-name"] [-Location "eastus"]
+.\setup-azure.ps1 -GitHubRepo "myorg/my-app"
+
+# Or with custom app name and location
+.\setup-azure.ps1 -GitHubRepo "myorg/my-app" -AppName "my-custom-name" -Location "westus2"
 ```
+
+The script automatically derives resource names from the app name:
+
+- **Resource Group**: `<app-name>-rg`
+- **App Registration**: `<app-name>-deploy`
 
 This script will:
 
