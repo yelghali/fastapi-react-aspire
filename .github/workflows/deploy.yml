@@ -1,0 +1,85 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+  NUGET_XMLDOC_MODE: skip
+  DOTNET_MULTILEVEL_LOOKUP: 0
+
+# Prevent concurrent deployments
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Azure
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Cache Aspire CLI
+        id: cache-aspire
+        uses: actions/cache@v4
+        with:
+          path: ~/.aspire
+          key: aspire-cli-${{ runner.os }}-${{ hashFiles('apphost.cs') }}-v1
+
+      - name: Install Aspire CLI
+        if: steps.cache-aspire.outputs.cache-hit != 'true'
+        run: curl -sSL https://aspire.dev/install.sh | bash
+
+      - name: Add Aspire to PATH
+        run: echo "$HOME/.aspire/bin" >> $GITHUB_PATH
+
+      - name: Warm up .NET SDK
+        run: |
+          dotnet --version
+          dotnet nuget locals all --list
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set build version
+        run: echo "BUILD_VERSION=$(date -u +'%Y%m%d.%H%M%S')" >> $GITHUB_ENV
+
+      - name: Deploy with Aspire
+        env:
+          BUILD_VERSION: ${{ env.BUILD_VERSION }}
+          Azure__TenantId: ${{ secrets.AZURE_TENANT_ID }}
+          Azure__SubscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          Azure__Location: ${{ secrets.AZURE_LOCATION }}
+          Azure__ResourceGroup: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          Azure__AllowResourceGroupCreation: false
+        run: aspire deploy --non-interactive
+
+      - name: Post deployment summary
+        if: success()
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Version**: ${{ env.BUILD_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Resource Group**: ${{ secrets.AZURE_RESOURCE_GROUP }}" >> $GITHUB_STEP_SUMMARY

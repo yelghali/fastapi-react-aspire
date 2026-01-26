@@ -86,8 +86,12 @@ fastapi-react-aspire/
 │   ├── server.js           # Production server
 │   ├── package.json
 │   └── Dockerfile
-└── .github/workflows/
-    └── ci.yml              # CI pipeline
+└── .github/
+    ├── workflows/
+    │   ├── ci.yml          # CI pipeline
+    │   └── deploy.yml      # Azure deployment
+    ├── copilot-instructions.md
+    └── prompts/            # Copilot prompt files
 ```
 
 ## 🛠️ Development
@@ -137,7 +141,7 @@ npm run lint
 
 ## 🚢 Deployment
 
-### Deploy to Azure
+### Deploy to Azure (Local)
 
 ```bash
 # One-command deployment to Azure Container Apps
@@ -150,6 +154,49 @@ This will:
 2. Push to Azure Container Registry
 3. Deploy to Azure Container Apps
 4. Configure environment variables and networking
+
+### GitHub Actions Deployment
+
+The template includes a deployment workflow (`.github/workflows/deploy.yml`) that deploys using Aspire.
+
+**Required Secrets** (configure in GitHub repository settings):
+
+| Secret | Description |
+| ------ | ----------- |
+| `AZURE_CLIENT_ID` | Service principal client ID |
+| `AZURE_TENANT_ID` | Azure AD tenant ID |
+| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID |
+| `AZURE_LOCATION` | Azure region (e.g., `eastus`) |
+| `AZURE_RESOURCE_GROUP` | Target resource group name |
+
+**Setup OIDC Authentication**:
+
+```bash
+# Create a service principal with federated credentials
+az ad app create --display-name "fastapi-starter-deploy"
+az ad sp create --id <APP_ID>
+
+# Create federated credential for GitHub Actions
+az ad app federated-credential create \
+  --id <APP_ID> \
+  --parameters '{
+    "name": "github-deploy",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "subject": "repo:YOUR_ORG/fastapi-react-aspire:ref:refs/heads/main",
+    "audiences": ["api://AzureADTokenExchange"]
+  }'
+
+# Grant permissions to the subscription/resource group
+az role assignment create \
+  --assignee <APP_ID> \
+  --role "Contributor" \
+  --scope /subscriptions/<SUBSCRIPTION_ID>
+```
+
+**Trigger deployment**:
+
+- Push to `main` branch (auto-deploys on changes to api/, web/, apphost.cs)
+- Manual trigger via GitHub Actions UI
 
 ### Manual Docker Build
 
