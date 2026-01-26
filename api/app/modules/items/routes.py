@@ -24,7 +24,8 @@ async def list_items(
 ) -> list[Item]:
     """List all items."""
     with trace_span("list_items_endpoint", attributes={"active_only": active_only}):
-        return await service.list_items(active_only=active_only)
+        items = await service.list_items(active_only=active_only)
+        return items
 
 
 @router.get(
@@ -58,7 +59,8 @@ async def create_item(
 ) -> Item:
     """Create a new item."""
     with trace_span("create_item_endpoint", attributes={"name": item_create.name}):
-        return await service.create_item(item_create)
+        created = await service.create_item(item_create)
+        return created
 
 
 @router.patch(
@@ -74,10 +76,10 @@ async def update_item(
 ) -> Item:
     """Update an existing item."""
     with trace_span("update_item_endpoint", attributes={"item_id": item_id}):
-        item = await service.update_item(item_id, item_update)
-        if not item:
+        updated = await service.update_item(item_id, item_update)
+        if not updated:
             raise HTTPException(status_code=404, detail=f"Item '{item_id}' not found")
-        return item
+        return updated
 
 
 @router.delete(

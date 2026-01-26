@@ -19,7 +19,8 @@
     "verbatimModuleSyntax": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"]
+      "~/*": ["./app/*"],
+      "@lib/*": ["./lib/*"]
     }
   },
   "include": [

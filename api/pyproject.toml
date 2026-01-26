@@ -49,6 +49,9 @@ testpaths = ["tests"]
 python_version = "3.13"
 strict = true
 ignore_missing_imports = true
+# Disable no-any-return because the @trace decorator erases return types
+# This is a known limitation when using decorators that return Callable[..., Any]
+warn_return_any = false
 
 [tool.ruff]
 line-length = 100

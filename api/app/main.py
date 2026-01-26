@@ -16,8 +16,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+from collections.abc import AsyncGenerator
+
+
 @contextlib.asynccontextmanager
-async def lifespan(app: fastapi.FastAPI):
+async def lifespan(app: fastapi.FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan handler - configure telemetry on startup."""
     configure_opentelemetry()
     logger.info("Application started with OpenTelemetry configured")
@@ -47,7 +50,7 @@ app.include_router(items_router, prefix="/api")
 
 
 @app.get("/", response_class=fastapi.responses.HTMLResponse)
-async def root():
+async def root() -> str:
     """Root endpoint with welcome message."""
     return """
     <html>
@@ -62,7 +65,7 @@ async def root():
 
 
 @app.get("/health", response_class=fastapi.responses.PlainTextResponse)
-async def health_check():
+async def health_check() -> str:
     """Health check endpoint for Aspire and container orchestration."""
     return "Healthy"
 

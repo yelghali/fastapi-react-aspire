@@ -16,7 +16,7 @@ import {
   HiOutlinePlus,
   HiOutlineRefresh,
 } from "react-icons/hi";
-import { traced } from "../../lib/telemetry";
+import { traced } from "@lib/telemetry";
 
 export const meta: MetaFunction = () => {
   return [

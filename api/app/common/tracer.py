@@ -7,9 +7,9 @@ to service methods and code blocks.
 import contextlib
 import inspect
 import logging
-from collections.abc import Callable, Generator
+from collections.abc import Generator
 from functools import partial, wraps
-from typing import Any
+from typing import Any, Callable
 
 from opentelemetry import trace as otel_trace
 from opentelemetry.trace import Span, Status, StatusCode
@@ -52,11 +52,11 @@ def _set_span_attributes(span: Span, attributes: dict[str, Any]) -> None:
 
 
 def _trace_sync(
-    func: Callable,
+    func: Callable[..., Any],
     tracer: otel_trace.Tracer,
     capture_args: bool = True,
     ignore_params: list[str] | None = None,
-) -> Callable:
+) -> Callable[..., Any]:
     """Wrap a synchronous function with tracing."""
     ignore_params = ignore_params or []
 
@@ -86,11 +86,11 @@ def _trace_sync(
 
 
 def _trace_async(
-    func: Callable,
+    func: Callable[..., Any],
     tracer: otel_trace.Tracer,
     capture_args: bool = True,
     ignore_params: list[str] | None = None,
-) -> Callable:
+) -> Callable[..., Any]:
     """Wrap an asynchronous function with tracing."""
     ignore_params = ignore_params or []
 
@@ -120,12 +120,12 @@ def _trace_async(
 
 
 def trace(
-    func: Callable | None = None,
+    func: Callable[..., Any] | None = None,
     *,
     tracer_name: str = DEFAULT_TRACER_NAME,
     capture_args: bool = True,
     ignore_params: list[str] | None = None,
-) -> Callable:
+) -> Callable[..., Any]:
     """Decorator to trace function execution with OpenTelemetry spans.
 
     Usage:
