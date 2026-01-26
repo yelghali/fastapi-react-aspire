@@ -2,6 +2,7 @@
 
 import contextlib
 import logging
+from collections.abc import AsyncGenerator
 
 import fastapi
 import fastapi.responses
@@ -16,11 +17,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-from collections.abc import AsyncGenerator
-
-
 @contextlib.asynccontextmanager
-async def lifespan(app: fastapi.FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: fastapi.FastAPI) -> AsyncGenerator[None]:
     """Application lifespan handler - configure telemetry on startup."""
     configure_opentelemetry()
     logger.info("Application started with OpenTelemetry configured")

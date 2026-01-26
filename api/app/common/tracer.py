@@ -7,9 +7,9 @@ to service methods and code blocks.
 import contextlib
 import inspect
 import logging
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from functools import partial, wraps
-from typing import Any, Callable
+from typing import Any
 
 from opentelemetry import trace as otel_trace
 from opentelemetry.trace import Span, Status, StatusCode

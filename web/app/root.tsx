@@ -17,7 +17,7 @@ import {
   useLoaderData,
 } from "react-router";
 import { useEffect } from "react";
-import { initTelemetry, isTelemetryInitialized } from "@lib/telemetry";
+import { initTelemetry, isTelemetryInitialized } from "../lib/telemetry";
 
 import "./app.css";
 
