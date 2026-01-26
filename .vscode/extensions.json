@@ -1,0 +1,28 @@
+{
+  "recommendations": [
+    // Core
+    "github.copilot",
+    "github.copilot-chat",
+
+    // Python
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+
+    // TypeScript/JavaScript
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+
+    // Tailwind CSS
+    "bradlc.vscode-tailwindcss",
+
+    // Aspire & Azure
+    "ms-dotnettools.dotnet-aspire",
+    "ms-azuretools.vscode-cosmosdb",
+
+    // General
+    "davidanson.vscode-markdownlint",
+    "editorconfig.editorconfig"
+  ]
+}
+

@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.13"
+  NODE_VERSION: "22"
+
+jobs:
+  # API Tests and Checks
+  api:
+    name: API - Test & Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run linter (ruff)
+        run: uv run ruff check app/
+
+      - name: Run type checker (mypy)
+        run: uv run mypy app/
+
+      - name: Run tests
+        run: uv run pytest --tb=short -v
+
+  # Web Build and Checks
+  web:
+    name: Web - Build & Typecheck
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type checker
+        run: npm run typecheck
+
+      - name: Build application
+        run: npm run build
+        env:
+          BUILD_VERSION: ${{ github.sha }}
+
+  # Docker Build Test (optional, ensures Dockerfiles are valid)
+  docker:
+    name: Docker - Build Test
+    runs-on: ubuntu-latest
+    needs: [api, web]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API Docker image
+        run: docker build -t starter-api:test ./api
+
+      - name: Build Web Docker image
+        run: |
+          docker build \
+            --build-arg BUILD_VERSION=${{ github.sha }} \
+            -t starter-web:test \
+            ./web
