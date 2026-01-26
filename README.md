@@ -229,7 +229,15 @@ See [AGENTS.md](AGENTS.md) for instructions on adding:
 - Azure Blob Storage
 - Azure AI Foundry
 
-## 📚 Learn More
+## � Documentation
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System design, data flows, module patterns | Developers understanding the codebase |
+| [AGENTS.md](AGENTS.md) | Extension guide, common tasks, troubleshooting | AI agents and developers extending the template |
+| [.github/copilot-instructions.md](.github/copilot-instructions.md) | Coding standards and conventions | AI coding assistants |
+
+## �📚 Learn More
 
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [React Router v7](https://reactrouter.com/)

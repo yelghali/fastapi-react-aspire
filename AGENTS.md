@@ -2,6 +2,49 @@
 
 This repository is set up to use **Aspire**. Aspire is an orchestrator for the entire application and takes care of configuring dependencies, building, and running the application. The resources that make up the application are defined in `apphost.cs` including application code and external dependencies.
 
+## Quick Reference for Agents
+
+### Key Files to Know
+
+| File | Purpose | When to Modify |
+|------|---------|----------------|
+| `apphost.cs` | Aspire orchestration | Adding Azure services, changing ports |
+| `api/app/main.py` | FastAPI entry point | Adding routers, middleware |
+| `api/app/common/settings.py` | Configuration | Adding environment variables |
+| `api/app/common/tracer.py` | Tracing utilities | Rarely (already complete) |
+| `web/vite.config.ts` | Vite + proxy config | Changing API proxy, build settings |
+| `web/app/routes.ts` | Route definitions | Adding new pages |
+
+### Common Tasks
+
+| Task | Command/Action |
+|------|----------------|
+| Run locally | `aspire run` |
+| Run API tests | `cd api && uv run pytest` |
+| Run web typecheck | `cd web && npm run typecheck` |
+| Format Python | `cd api && uv run ruff format app/` |
+| Check Python lint | `cd api && uv run ruff check app/` |
+| Add Python dep | Edit `api/pyproject.toml`, then `uv sync` |
+| Add npm dep | `cd web && npm install <package>` |
+| Deploy to Azure | `aspire deploy` |
+
+### Environment Variables Pattern
+
+All API config uses `APP_` prefix and is set in `apphost.cs`:
+
+```python
+# In api/app/common/settings.py
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="APP_")
+    
+    my_new_setting: str = Field(default="", description="...")
+```
+
+```csharp
+// In apphost.cs
+.WithEnvironment("APP_MY_NEW_SETTING", "value")
+```
+
 ## General Recommendations for Working with Aspire
 
 1. Before making any changes, always run the apphost using `aspire run` and inspect the state of resources to make sure you are building from a known state.
@@ -181,6 +224,68 @@ api/app/modules/newmodule/
 └── routes.py        # FastAPI endpoints
 ```
 
+### Step-by-Step: Adding a New Module
+
+1. **Create the directory**: `api/app/modules/newmodule/`
+
+2. **Create schemas.py** with Pydantic models:
+
+   ```python
+   from pydantic import BaseModel, Field
+   
+   class NewItemBase(BaseModel):
+       name: str = Field(..., description="Item name")
+   
+   class NewItemCreate(NewItemBase):
+       pass
+   
+   class NewItem(NewItemBase):
+       id: str
+       type: str = "newitem"
+   ```
+
+3. **Create service.py** with business logic:
+
+   ```python
+   from ...common.tracer import trace
+   
+   class NewItemService:
+       @trace
+       async def create(self, item: NewItemCreate) -> NewItem:
+           # Implementation
+           pass
+   ```
+
+4. **Create routes.py** with endpoints:
+
+   ```python
+   from fastapi import APIRouter, Depends
+   from ...common.tracer import trace_span
+   
+   router = APIRouter(prefix="/newitems", tags=["newitems"])
+   
+   @router.post("/", response_model=NewItem)
+   async def create(item: NewItemCreate, service = Depends(get_service)):
+       with trace_span("create_newitem"):
+           return await service.create(item)
+   ```
+
+5. **Create **init**.py** to export:
+
+   ```python
+   from .routes import router as newitem_router
+   __all__ = ["newitem_router"]
+   ```
+
+6. **Register in main.py**:
+
+   ```python
+   from .modules.newmodule import newitem_router
+   app.include_router(newitem_router, prefix="/api")
+   ```
+
+7. **Add tests** in `api/tests/unit/test_newitem_service.py`
+
 Register the router in `api/app/main.py`:
 
 ```python
@@ -295,3 +400,68 @@ Always prefer official documentation when available:
 4. <https://fastapi.tiangolo.com>
 5. <https://reactrouter.com>
 6. <https://playwright.dev>
+
+---
+
+## Troubleshooting Guide
+
+### Aspire Won't Start
+
+```bash
+# Update Aspire CLI
+curl -sSL https://aspire.dev/install.sh | bash  # Linux/macOS
+irm https://aspire.dev/install.ps1 | iex        # Windows
+
+# Check for port conflicts
+netstat -an | grep 8000
+netstat -an | grep 5173
+```
+
+### API Tests Failing
+
+```bash
+# Ensure dependencies installed
+cd api && uv sync
+
+# Run with verbose output
+uv run pytest -v --tb=long
+
+# Check for mypy issues
+uv run mypy app/
+```
+
+### Web TypeScript Errors
+
+```bash
+# Ensure dependencies installed
+cd web && npm ci
+
+# Clear caches and rebuild
+rm -rf node_modules .react-router
+npm install
+npm run typecheck
+```
+
+### Traces Not Appearing in Dashboard
+
+1. Check `api/app/telemetry.py` is called in lifespan
+2. Verify OTEL environment variables are set (check Aspire logs)
+3. Ensure `@trace` decorator is on service methods
+4. Look for errors in Aspire console logs
+
+### Deployment Failures
+
+1. Check GitHub secrets are configured:
+   - `AZURE_CLIENT_ID`
+   - `AZURE_TENANT_ID`
+   - `AZURE_SUBSCRIPTION_ID`
+   - `AZURE_LOCATION`
+   - `AZURE_RESOURCE_GROUP`
+
+2. Verify Azure permissions:
+
+   ```bash
+   az role assignment list --assignee <CLIENT_ID>
+   ```
+
+3. Check Aspire logs for specific errors
