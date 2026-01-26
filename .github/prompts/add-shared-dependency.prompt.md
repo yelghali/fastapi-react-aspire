@@ -157,4 +157,3 @@ def test_endpoint():
 3. **Consistency**: All services use same configuration
 4. **Debugging**: Named functions show up in stack traces
 5. **Type Safety**: Full type hints for IDE support
-

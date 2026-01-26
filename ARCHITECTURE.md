@@ -94,8 +94,8 @@ OTLP HTTP Exporter ──► Aspire Dashboard
 
 All configuration flows through Aspire-managed environment variables:
 
-| Variable | Set By | Used By | Description |
-|----------|--------|---------|-------------|
+| Variable                      | Set By     | Used By | Description           |
+| ----------------------------- | ---------- | ------- | --------------------- |
 | `APP_DATABASE_CONNECTION` | apphost.cs | API | Cosmos DB endpoint |
 | `APP_DATABASE_NAME` | apphost.cs | API | Database name |
 | `APP_STORAGE_CONNECTION` | apphost.cs | API | Blob storage endpoint |
@@ -237,8 +237,8 @@ See [AGENTS.md](AGENTS.md) for detailed instructions on adding:
 
 ### Common Issues
 
-| Symptom | Cause | Solution |
-|---------|-------|----------|
+| Symptom              | Cause              | Solution                                              |
+| -------------------- | ------------------ | ----------------------------------------------------- |
 | `aspire run` fails | Old CLI version | `curl -sSL https://aspire.dev/install.sh \| bash` |
 | API not found | Port conflict | Check Aspire dashboard for actual ports |
 | Traces not showing | OTEL not configured | Verify `configure_opentelemetry()` runs |

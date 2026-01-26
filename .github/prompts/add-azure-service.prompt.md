@@ -76,4 +76,3 @@ Document the integration for future reference.
 - **Service Bus**: `Aspire.Hosting.Azure.ServiceBus`, `azure-servicebus`
 - **Key Vault**: `Aspire.Hosting.Azure.KeyVault`, `azure-keyvault-secrets`
 - **Redis**: `Aspire.Hosting.Azure.Redis`, `redis`
-

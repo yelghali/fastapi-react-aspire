@@ -283,4 +283,3 @@ async def test_create_{{name}}(mock_cosmos_service):
 4. **Error Handling**: Return `None` from service, raise `HTTPException` in routes
 5. **Pagination**: Use `continuation_token` pattern for Cosmos DB pagination
 6. **Type Discriminator**: Include `type` field in schemas for polymorphic queries
-

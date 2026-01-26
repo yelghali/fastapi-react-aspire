@@ -25,12 +25,12 @@ Analyze the CI failure and provide a fix. Common issues include:
 
 ## Common Fixes
 
-| Error Type | Common Fix |
-|------------|------------|
-| mypy Callable error | Use `from collections.abc import Callable` |
-| ruff import order | Move `from __future__ import` to top |
-| TypeScript file not found | Check `.gitignore` isn't excluding it |
-| pytest async error | Add `@pytest.mark.asyncio` decorator |
+| Error Type                | Common Fix                                 |
+| ------------------------- | ------------------------------------------ |
+| mypy Callable error       | Use `from collections.abc import Callable` |
+| ruff import order         | Move `from __future__ import` to top       |
+| TypeScript file not found | Check `.gitignore` isn't excluding it      |
+| pytest async error        | Add `@pytest.mark.asyncio` decorator       |
 
 ## Output
 

@@ -65,4 +65,3 @@ Update `web/app/root.tsx` to include a nav link if needed:
 - Style with Tailwind utility classes
 - Wrap API calls with `traced()` from `~/lib/telemetry` for OTEL
 - Use TypeScript strictly
-

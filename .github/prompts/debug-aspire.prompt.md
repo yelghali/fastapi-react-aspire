@@ -10,7 +10,7 @@ Use the Aspire dashboard to diagnose issues in the running application.
 
 ### Check Resource Status
 
-1. Open the Aspire dashboard at http://localhost:15888
+1. Open the Aspire dashboard at <http://localhost:15888>
 2. Look at the **Resources** tab
 3. Verify all services show green (healthy) status
 
@@ -70,4 +70,3 @@ aspire run
 ```
 
 Type `y` when prompted to stop the existing instance.
-

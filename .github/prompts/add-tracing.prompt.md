@@ -53,11 +53,11 @@ with trace_span("process_order") as span:
 Wrap API calls with `traced()` from `lib/telemetry.ts`:
 
 ```typescript
-import { traced } from '~/lib/telemetry';
+import { traced } from "~/lib/telemetry";
 
 export async function fetchItems() {
-  return traced('fetch-items', async () => {
-    const response = await fetch('/api/items');
+  return traced("fetch-items", async () => {
+    const response = await fetch("/api/items");
     return response.json();
   });
 }
@@ -66,6 +66,7 @@ export async function fetchItems() {
 ## Verification
 
 After adding tracing:
+
 1. Run `aspire run`
 2. Trigger the traced code
-3. Check Aspire Dashboard (http://localhost:15888) for new spans
+3. Check Aspire Dashboard (<http://localhost:15888>) for new spans

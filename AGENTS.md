@@ -6,8 +6,8 @@ This repository is set up to use **Aspire**. Aspire is an orchestrator for the e
 
 ### Key Files to Know
 
-| File | Purpose | When to Modify |
-|------|---------|----------------|
+| File                         | Purpose               | When to Modify                         |
+| ---------------------------- | --------------------- | -------------------------------------- |
 | `apphost.cs` | Aspire orchestration | Adding Azure services, changing ports |
 | `api/app/main.py` | FastAPI entry point | Adding routers, middleware |
 | `api/app/common/settings.py` | Configuration | Adding environment variables |
@@ -17,8 +17,8 @@ This repository is set up to use **Aspire**. Aspire is an orchestrator for the e
 
 ### Common Tasks
 
-| Task | Command/Action |
-|------|----------------|
+| Task               | Command/Action                       |
+| ------------------ | ------------------------------------ |
 | Run locally | `aspire run` |
 | Run API tests | `cd api && uv run pytest` |
 | Run web typecheck | `cd web && npm run typecheck` |

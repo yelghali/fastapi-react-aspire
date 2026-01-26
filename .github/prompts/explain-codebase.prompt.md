@@ -19,6 +19,7 @@ Reference [ARCHITECTURE.md](../../ARCHITECTURE.md) for detailed diagrams and exp
 ## Output Format
 
 Provide a structured explanation suitable for a developer new to the codebase. Include:
+
 - Visual diagrams (ASCII) where helpful
 - Key file paths to explore
 - Gotchas and important details

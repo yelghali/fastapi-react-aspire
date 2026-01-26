@@ -83,4 +83,3 @@ def get_mymodule_service(
 4. For Azure services, update `apphost.cs` and add to `api/app/common/`
 5. Always add OpenTelemetry tracing to new code
 6. Add unit tests with mocks in `api/tests/unit/`
-

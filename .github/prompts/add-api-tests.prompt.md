@@ -291,4 +291,3 @@ uv run pytest tests/unit/test_{{name}}_service.py -v
 3. **Async Support**: Use `@pytest.mark.asyncio` for async tests
 4. **Class Grouping**: Group related tests in classes for organization
 5. **AAA Pattern**: Arrange, Act, Assert in each test
-
