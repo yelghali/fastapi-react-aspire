@@ -9,4 +9,6 @@ export default [
   index("routes/home.tsx"),
   // Items page - demonstrates API integration
   route("items", "routes/items.tsx"),
+  // Projects page - GitHub-integrated project management
+  route("projects", "routes/projects.tsx"),
 ] satisfies RouteConfig;

@@ -41,6 +41,101 @@ Browser ──► Azure Container App (Web) ──► Azure Container App (API) 
                               (Traces & Logs)
 ```
 
+## Data Model Diagram
+
+The following ER diagram reflects the current API data contracts defined in:
+
+- [api/app/modules/items/schemas.py](api/app/modules/items/schemas.py)
+- [api/app/modules/projects/schemas.py](api/app/modules/projects/schemas.py)
+
+```mermaid
+erDiagram
+    ITEM {
+        string id PK
+        string name
+        string description
+        bool is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    GITHUB_USER {
+        string login PK
+        string avatar_url
+        string html_url
+    }
+
+    GITHUB_LABEL {
+        string name PK
+        string color
+        string description
+    }
+
+    GITHUB_MILESTONE {
+        int number PK
+        string title
+        string description
+        string state
+        int open_issues
+        int closed_issues
+        datetime due_on
+        string html_url
+    }
+
+    GITHUB_ISSUE {
+        int number PK
+        string title
+        string body
+        string state
+        int comments
+        datetime created_at
+        datetime updated_at
+        datetime closed_at
+        string html_url
+        string pull_request_url
+    }
+
+    GITHUB_PULL_REQUEST {
+        int number PK
+        string title
+        string state
+        datetime created_at
+        datetime updated_at
+        datetime merged_at
+        string html_url
+        bool draft
+    }
+
+    GITHUB_COMMENT {
+        int id PK
+        string body
+        datetime created_at
+        datetime updated_at
+        string html_url
+    }
+
+    REPO_OVERVIEW {
+        string full_name PK
+        string description
+        string html_url
+        int stars
+        int forks
+        int open_issues_count
+        string language
+        string default_branch
+        datetime updated_at
+    }
+
+    GITHUB_ISSUE }o--o{ GITHUB_LABEL : labels
+    GITHUB_ISSUE }o--o{ GITHUB_USER : assignees
+    GITHUB_ISSUE }o--|| GITHUB_USER : author
+    GITHUB_ISSUE }o--|| GITHUB_MILESTONE : milestone
+    GITHUB_PULL_REQUEST }o--o{ GITHUB_LABEL : labels
+    GITHUB_PULL_REQUEST }o--|| GITHUB_USER : author
+    GITHUB_COMMENT }o--|| GITHUB_USER : author
+    GITHUB_ISSUE ||--o{ GITHUB_COMMENT : comments
+```
+
 ## OpenTelemetry Pipeline
 
 ### Backend Tracing (Python)

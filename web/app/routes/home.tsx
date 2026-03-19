@@ -35,6 +35,12 @@ export default function Home() {
             >
               Items Demo
             </Link>
+            <Link
+              to="/projects"
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Projects
+            </Link>
             <a
               href="/docs"
               className="text-blue-600 dark:text-blue-400 hover:underline"
@@ -94,12 +100,20 @@ export default function Home() {
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <Link
-            to="/items"
-            className="inline-block px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Try the Items Demo →
-          </Link>
+          <div className="flex gap-4 justify-center">
+            <Link
+              to="/items"
+              className="inline-block px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try the Items Demo →
+            </Link>
+            <Link
+              to="/projects"
+              className="inline-block px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Project Dashboard →
+            </Link>
+          </div>
         </div>
       </main>
 

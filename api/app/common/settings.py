@@ -45,6 +45,16 @@ class Settings(BaseSettings):
         description="Storage container name",
     )
 
+    # GitHub integration settings
+    github_repo: str = Field(
+        default="sethjuarez/fastapi-react-aspire",
+        description="GitHub repository in owner/repo format",
+    )
+    github_token: str = Field(
+        default="",
+        description="GitHub personal access token (optional, enables write access and higher rate limits)",
+    )
+
     # AI settings (for future Azure AI Foundry integration)
     foundry_endpoint: str = Field(
         default="",

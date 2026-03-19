@@ -10,6 +10,7 @@ import opentelemetry.instrumentation.fastapi as otel_fastapi
 from fastapi.middleware.cors import CORSMiddleware
 
 from .modules.items import items_router
+from .modules.projects import projects_router
 from .telemetry import configure_opentelemetry
 
 # Configure logging
@@ -45,6 +46,7 @@ app.add_middleware(
 
 # Register routers
 app.include_router(items_router, prefix="/api")
+app.include_router(projects_router, prefix="/api")
 
 
 @app.get("/", response_class=fastapi.responses.HTMLResponse)

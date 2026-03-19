@@ -1,5 +1,7 @@
 ---
 description: Debug issues using Aspire dashboard
+agent: ask
+model: GPT-5.1
 ---
 
 # Debug with Aspire
